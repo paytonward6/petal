@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "petal"
+version = "0.1.0"
+dependencies = ["Jinja2", "pydantic"]
+
+[project.scripts]
+petal = "petal:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+]
