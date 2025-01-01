@@ -23,7 +23,6 @@ def handle_list_opts(first_arg: str):
   template = template_registry[template_name]
 
   attrs = recurse_attrs(template, hyphenate=True)
-  print(attrs)
   return attrs
 
 
