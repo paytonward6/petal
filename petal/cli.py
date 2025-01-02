@@ -29,14 +29,15 @@ def handle_list_opts(first_arg: str):
 class PetalArgumentParser(argparse.ArgumentParser):
   def __init__(self):
     super().__init__()
-    self.add_argument("--list-opts", required=False, default=None, action="store")
+    self.add_argument("--list-opts", required=False, action="store", default=None)
     self.add_argument("--autocomplete", required=False, action="store_true")
 
   def run(self):
     args = self.parse_args()
 
     if args.list_opts is not None:
-      opts = handle_list_opts(args.list_opts)
+      list_opts = args.list_opts.split(" ")[0]
+      opts = handle_list_opts(list_opts)
       if opts:
         print(" ".join(opts))
     elif args.autocomplete:
