@@ -10,7 +10,7 @@ def autocomplete():
     cur="${COMP_WORDS[COMP_CWORD]}"
     first="${COMP_WORDS[1]}"
 
-    opts=$(petal --list-opts "$first")
+    opts=$(petal --list-opts "${COMP_WORDS[*]:1}")
     COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
     return 0
   }

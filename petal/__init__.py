@@ -9,15 +9,20 @@ from .registry import template_registry
 from .autocomplete import autocomplete
 
 
+class Range(BaseModel):
+    top: int
+    bottom: int
+
 class Port(BaseModel):
     number: int
     type: t.Optional[str] = None
+    range: Range
 
 class Deployment(BaseModel):
     name: str
     image: str
     # TODO: make this a list
-    ports: t.Optional[list[Port]] = None
+    ports: t.Optional[Port] = None
 
 
 def main():
@@ -52,7 +57,7 @@ def main():
     template = Deployment(
       name="nginx",
       image="nginx-1.1",
-      ports=[Port(number=8080)]
+      ports=Port(number=8080, range=Range(top=1, bottom=7))
     )
     template_registry.register("deployment", template, text)
     template_registry.register("this", template, text)

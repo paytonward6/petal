@@ -59,7 +59,7 @@ template = Deployment(
         ("", ["deployment1234", "deployment5678", "other"]),
         ("de", ["deployment1234", "deployment5678", "other"]),
         ("deployment1", ["deployment1234", "deployment5678", "other"]),
-        ("deployment1234", ["--name", "--image", "--ports.number", "--ports.type"]),
+        ("deployment1234", ["--name", "--image", "--ports.number", "--ports.type", "--ports.range.top", "--ports.range.bottom"]),
     ]
 )
 def test_handle_list_opts(arg, want):
@@ -68,5 +68,5 @@ def test_handle_list_opts(arg, want):
   template_registry.register("other", template, text)
   template_registry.load_templates()
 
-  assert want == handle_list_opts(arg)
+  assert sorted(want) == sorted(handle_list_opts(arg))
 
