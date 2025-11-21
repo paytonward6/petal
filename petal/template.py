@@ -1,3 +1,4 @@
+import typing
 from pydantic import BaseModel
 from jinja2 import meta
 
@@ -38,6 +39,11 @@ def _recurse_attrs(curr_type, curr_name, cumulative):
         cumulative.append(curr_name)
         continue
 
+    # # list[_]
+    # elif typing.get_origin(curr_type) is list:
+    #   curr_type = typing.get_origin(curr_type)
+    #   curr_name = update_name(curr_name, name)
+    #   return _recurse_attrs(curr_type, curr_name, cumulative)
     elif issubclass(annotation, BaseModel):
       curr_name = update_name(curr_name, name)
       return _recurse_attrs(annotation, curr_name, cumulative)
@@ -45,16 +51,14 @@ def _recurse_attrs(curr_type, curr_name, cumulative):
     cumulative.append(update_name(curr_name, name))
   return cumulative
 
-for i in range(10):
-  print(i)
-
 
 def recurse_attrs(template: Template, hyphenate: bool = True):
   init_type = type(template.attrs)
+  # eprint(init_type)
   acc = []
   attrs = _recurse_attrs(init_type, "", acc)
   if hyphenate:
     _hyphenate = lambda x: f"--{x}"
     return [_hyphenate(x) for x in attrs]
-  
+
   return attrs

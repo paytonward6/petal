@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from .cli import PetalArgumentParser
 from .registry import template_registry
 from .autocomplete import autocomplete
+from .template import recurse_attrs
 
 
 class Port(BaseModel):
@@ -17,7 +18,7 @@ class Deployment(BaseModel):
     name: str
     image: str
     # TODO: make this a list
-    ports: t.Optional[list[Port]] = None
+    ports: list[Port]
 
 
 def main():
@@ -47,7 +48,7 @@ def main():
           {% for port in ports %}
           - containerPort: {{ port.number }}
           {% endfor %} {% endif %}
-  
+
     """
     template = Deployment(
       name="nginx",
@@ -55,12 +56,16 @@ def main():
       ports=[Port(number=8080)]
     )
     template_registry.register("deployment", template, text)
+    subparsers = parser.add_subparsers(dest="template")
+    p = subparsers.add_parser("deployment")
+    for arg in recurse_attrs(template_registry["deployment"], hyphenate=True):
+        p.add_argument(arg)
+
     template_registry.register("this", template, text)
     template_registry.load_templates()
-  
-  
+
     parser.run()
-  
+
 
 if __name__ == "__main__":
   main()

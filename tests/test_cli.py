@@ -6,14 +6,9 @@ from pydantic import BaseModel
 from petal.registry import template_registry
 from petal.cli import handle_list_opts
 
-class Range(BaseModel):
-    top: int
-    bottom: int
-
 class Port(BaseModel):
     number: int
     type: t.Optional[str] = None
-    range: Range
 
 class Deployment(BaseModel):
     name: str
@@ -52,7 +47,7 @@ spec:
 template = Deployment(
   name="nginx",
   image="nginx-1.1",
-  ports=Port(number=8080, range=Range(top=1, bottom=7))
+  ports=Port(number=8080)
 )
 
 @pytest.mark.parametrize("arg,want", [

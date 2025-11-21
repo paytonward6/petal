@@ -22,14 +22,14 @@ def handle_list_opts(first_arg: str):
 
   template = template_registry[template_name]
 
+  # eprint(template)
   attrs = recurse_attrs(template, hyphenate=True)
-  print(attrs)
   return attrs
 
 
 class PetalArgumentParser(argparse.ArgumentParser):
-  def __init__(self):
-    super().__init__()
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
     self.add_argument("--list-opts", required=False, default=None, action="store")
     self.add_argument("--autocomplete", required=False, action="store_true")
 
@@ -42,4 +42,10 @@ class PetalArgumentParser(argparse.ArgumentParser):
         print(" ".join(opts))
     elif args.autocomplete:
       print(autocomplete())
+    elif args.template is not None:
+      template = template_registry[args.template]
+      arg_names = recurse_attrs(template, hyphenate=False)
+      arg_values = vars(args)
+      for arg in arg_names:
+          print(arg_values[arg])
 
