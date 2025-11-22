@@ -14,9 +14,8 @@ class TemplateRegistry:
 
     self._storage: dict[str, Template] = dict()
 
-  def register(self, name: str, template: BaseModel, text: str):
-    template = Template(name=name, attrs=template, text=text)
-    self._storage[name] = template
+  def register(self, name: str, template: type[BaseModel], text: str):
+    self._storage[name] = Template(name=name, attrs=template, text=text)
 
   def unregister(self, name: str):
     del self._storage[name]

@@ -7,7 +7,7 @@ from ._utils import eprint
 
 class Template(BaseModel):
     name: str
-    attrs: BaseModel
+    attrs: type[BaseModel]
     text: str
 
 
@@ -23,18 +23,27 @@ def update_name(curr_name, name):
   return name if curr_name == "" else f"{curr_name}.{name}"
 
 
-def _recurse_attrs(curr_type, curr_name, cumulative):
-  for name, value in curr_type.model_fields.items():
-    annotation = value.annotation
+def schema_path(schema: dict, path: str):
+  def get_nd(d, keys):
+      if not keys:
+          return d
+      return get_nd(d[keys[0]], keys[1:]) 
 
-    # Unions: only supports typing.Optional at the moment
-    if hasattr(annotation, "__args__"):
-      union_type =  annotation.__args__
-      curr_type = union_type[0]
+  _, *p = path.split("/")
+  return get_nd(schema, p)
+
+
+def _recurse_attrs(curr_property, curr_name, schema, cumulative):
+  for name, definition in curr_property.items():
+    if "anyOf" in definition:
+      # TODO: not holistic, fix
+      curr_property = definition["anyOf"][0]
       curr_name = update_name(curr_name, name)
 
-      if issubclass(curr_type, BaseModel):
-        return _recurse_attrs(curr_type, curr_name, cumulative)
+      # An object, find it
+      if "$ref" in curr_property:
+        curr_property = schema_path(schema, curr_property["$ref"])["properties"]
+        return _recurse_attrs(curr_property, curr_name, schema, cumulative)
       else:
         cumulative.append(curr_name)
         continue
@@ -44,19 +53,21 @@ def _recurse_attrs(curr_type, curr_name, cumulative):
     #   curr_type = typing.get_origin(curr_type)
     #   curr_name = update_name(curr_name, name)
     #   return _recurse_attrs(curr_type, curr_name, cumulative)
-    elif issubclass(annotation, BaseModel):
+    elif "$ref" in definition:
       curr_name = update_name(curr_name, name)
-      return _recurse_attrs(annotation, curr_name, cumulative)
+      curr_property = schema_path(schema, definition["$ref"])["properties"]
+      return _recurse_attrs(curr_property, curr_name, schema, cumulative)
 
     cumulative.append(update_name(curr_name, name))
   return cumulative
 
 
 def recurse_attrs(template: Template, hyphenate: bool = True):
-  init_type = type(template.attrs)
+  init_type = template.attrs
+  schema = init_type.model_json_schema()
   # eprint(init_type)
   acc = []
-  attrs = _recurse_attrs(init_type, "", acc)
+  attrs = _recurse_attrs(schema["properties"], "", schema, acc)
   if hyphenate:
     _hyphenate = lambda x: f"--{x}"
     return [_hyphenate(x) for x in attrs]

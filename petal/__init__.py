@@ -50,11 +50,7 @@ def main():
           {% endfor %} {% endif %}
 
     """
-    template = Deployment(
-      name="nginx",
-      image="nginx-1.1",
-      ports=[Port(number=8080)]
-    )
+    template = Deployment
     template_registry.register("deployment", template, text)
     subparsers = parser.add_subparsers(dest="template")
     p = subparsers.add_parser("deployment")

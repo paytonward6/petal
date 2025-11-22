@@ -44,11 +44,7 @@ spec:
     {% endfor %} {% endif %}
 """
 
-template = Deployment(
-  name="nginx",
-  image="nginx-1.1",
-  ports=Port(number=8080)
-)
+template = Deployment
 
 @pytest.mark.parametrize("arg,want", [
         ("", ["deployment1234", "deployment5678", "other"]),
